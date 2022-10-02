@@ -1,7 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"log"
+	"net/http"
+
+	"github.com/VashUber/go-crud/internal/server"
+)
 
 func main() {
-	fmt.Println("init")
+	s := server.New()
+
+	log.Fatal(http.ListenAndServe(":8080", s))
 }
