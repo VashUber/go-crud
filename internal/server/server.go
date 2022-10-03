@@ -52,9 +52,12 @@ func (s *Server) createUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) getUser(w http.ResponseWriter, r *http.Request) {
-	json, _ := json.Marshal(User{
-		Name: "Jmishenko",
-		Age:  54,
-	})
-	w.Write(json)
+	name := r.URL.Query().Get("name")
+
+	if u, ok := users[name]; ok {
+		user, _ := json.Marshal(u)
+		w.Write(user)
+	} else {
+		w.WriteHeader(http.StatusNotFound)
+	}
 }
