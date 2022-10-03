@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -10,6 +9,11 @@ import (
 
 type Server struct {
 	router *mux.Router
+}
+
+type User struct {
+	Name string `json:"name"`
+	Age  uint8  `json:"age"`
 }
 
 func New() *Server {
@@ -25,11 +29,13 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) InitRoutes() {
-	s.router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		resp, err := json.Marshal("samara")
-		if err != nil {
-			fmt.Println(err)
-		}
-		w.Write(resp)
-	}).Methods("GET")
+	s.router.HandleFunc("/", s.getUser).Methods("GET")
+}
+
+func (s *Server) getUser(w http.ResponseWriter, r *http.Request) {
+	json, _ := json.Marshal(User{
+		Name: "Jmishenko",
+		Age:  54,
+	})
+	w.Write(json)
 }
