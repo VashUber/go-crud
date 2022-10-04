@@ -17,7 +17,7 @@ type User struct {
 	Age  uint8  `json:"age"`
 }
 
-var users = make(map[string]User)
+var users = make(map[string]*User)
 
 func New() *Server {
 	s := &Server{
@@ -35,6 +35,7 @@ func (s *Server) InitRoutes() {
 	s.router.HandleFunc("/api/user", s.getUser).Methods("GET")
 	s.router.HandleFunc("/api/user", s.createUser).Methods("POST")
 	s.router.HandleFunc("/api/user", s.deleteUser).Methods("DELETE")
+	s.router.HandleFunc("/api/user", s.updateUser).Methods("PUT")
 }
 
 func (s *Server) createUser(w http.ResponseWriter, r *http.Request) {
@@ -49,7 +50,7 @@ func (s *Server) createUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusConflict)
 		return
 	}
-	users[user.Name] = user
+	users[user.Name] = &user
 	w.WriteHeader(http.StatusCreated)
 }
 
@@ -57,7 +58,7 @@ func (s *Server) getUser(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Query().Get("name")
 
 	if u, ok := users[name]; ok {
-		user, _ := json.Marshal(u)
+		user, _ := json.Marshal(*u)
 		w.Write(user)
 	} else {
 		w.WriteHeader(http.StatusNotFound)
@@ -71,5 +72,26 @@ func (s *Server) deleteUser(w http.ResponseWriter, r *http.Request) {
 		delete(users, u.Name)
 	} else {
 		w.WriteHeader(http.StatusNotFound)
+	}
+}
+
+func (s *Server) updateUser(w http.ResponseWriter, r *http.Request) {
+	body, err := io.ReadAll(r.Body)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var user User
+	err = json.Unmarshal(body, &user)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if _, ok := users[user.Name]; ok {
+		users[user.Name].Age = user.Age
+		w.WriteHeader(http.StatusCreated)
 	}
 }
