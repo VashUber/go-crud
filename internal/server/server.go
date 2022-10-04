@@ -93,5 +93,8 @@ func (s *Server) updateUser(w http.ResponseWriter, r *http.Request) {
 	if _, ok := users[user.Name]; ok {
 		users[user.Name].Age = user.Age
 		w.WriteHeader(http.StatusCreated)
+	} else {
+		w.WriteHeader(http.StatusNotFound)
+		return
 	}
 }
