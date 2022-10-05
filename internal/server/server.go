@@ -57,8 +57,14 @@ func (s *Server) createUser(w http.ResponseWriter, r *http.Request) {
 func (s *Server) getUser(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Query().Get("name")
 
+	if len(name) == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	if u, ok := users[name]; ok {
 		user, _ := json.Marshal(*u)
+		w.Header().Set("content-type", "application/json")
 		w.Write(user)
 	} else {
 		w.WriteHeader(http.StatusNotFound)
